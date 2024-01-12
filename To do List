@@ -1,0 +1,55 @@
+<!-- index.php -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple To-Do List</title>
+</head>
+<body>
+    <h1>Simple To-Do List</h1>
+
+    <form action="" method="post">
+        <input type="text" name="task" placeholder="Add a new task..." required>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <ul>
+        <?php
+        session_start();
+
+        if (!isset($_SESSION['tasks'])) {
+            $_SESSION['tasks'] = [];
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $task = $_POST['task'];
+            if (!empty($task)) {
+                $_SESSION['tasks'][] = ['title' => $task, 'completed' => false];
+            }
+        }
+
+        if (isset($_GET['action']) && isset($_GET['index'])) {
+            $index = $_GET['index'];
+
+            if ($_GET['action'] === 'complete') {
+                $_SESSION['tasks'][$index]['completed'] = true;
+            } elseif ($_GET['action'] === 'delete') {
+                array_splice($_SESSION['tasks'], $index, 1);
+            }
+        }
+
+        foreach ($_SESSION['tasks'] as $index => $task) {
+            echo '<li>';
+            echo '<input type="checkbox" ' . ($task['completed'] ? 'checked' : '') . ' onchange="window.location.href=\'?action=complete&index=' . $index . '\'" />';
+            echo '<span style="text-decoration: ' . ($task['completed'] ? 'line-through' : 'none') . '">';
+            echo $task['title'];
+            echo '</span>';
+            echo '<a href="?action=delete&index=' . $index . '">Delete</a>';
+            echo '</li>';
+        }
+        ?>
+    </ul>
+</body>
+</html>
